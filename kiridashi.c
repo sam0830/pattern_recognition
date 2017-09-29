@@ -15,7 +15,7 @@ typedef unsigned char UCHAR;
 #define GYOU 1400		/* 原画像の行数 */
 #define RETU 910		/* 原画像の列数 */
 #define GYOU_MOJI 100		/* 切り出す画像の行数 */
-#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */  
+#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */
 #define N_MOJI 10		/* 文字種の総数 */
 #define N_SAMPLE 6		/* 1文字あたりのデータ数 */
 #define TH_BORDER 100		/* 画素値がこの値以下の場合に境界線とみなす */
@@ -59,7 +59,7 @@ int main(int argc,char *argv[])
   }
 
   sprintf(in_fname,"%s.pgm",id); /* 入力画像ファイル名 */
-    
+
   /***** 画像の読み込み *****/
   read_pgm(org, in_fname, &in_retu, &in_gyou);
 
@@ -126,23 +126,32 @@ void calc_gyou_heikin(UCHAR res[][RETU],UCHAR org[][RETU],int gyou,int retu)
   for(g=0;g<gyou;g++)
   {
 				/* この中を書く */
-
+    sum = 0;
+    for(r=0;r<retu;r++) {
+        sum += org[g][r];
+    }
+    av = sum/retu;
     for(r=0;r<retu;r++)
       res[g][r]=av;
   }
+
 }
 
 /***** 列平均値算出 *****/
 void calc_retu_heikin(UCHAR res[][RETU],UCHAR org[][RETU],int gyou,int retu)
 {
   int g,r;
-  float sum;
+  float sum = 0;
   UCHAR av;
 
   for(r=0;r<retu;r++)
   {
 				/* この中を書く */
-
+    sum = 0;
+    for(g=0;g<gyou;g++) {
+        sum += org[g][r];
+    }
+    av = sum/gyou;
     for(g=0;g<gyou;g++)
       res[g][r]=av;
   }
@@ -229,7 +238,7 @@ void read_pgm(UCHAR data_buf[][RETU], char *fname,int *width,int *height)
   FILE	*fp ;
   char	str_buf[128] ;
   char	magic_num[8] ; /* マジックナンバー */
-  int	max_val ;      /* 画素値の最大値 */    
+  int	max_val ;      /* 画素値の最大値 */
   int	c, i, m, n ;
   int	inc = '0' ;
   int	flg = 0 ;
@@ -238,15 +247,15 @@ void read_pgm(UCHAR data_buf[][RETU], char *fname,int *width,int *height)
   long  k;
   UCHAR val[GYOU*RETU]; /* データ読み込み用バッファ(画像と同じサイズ) */
 
-  /* ファイルを開く */    
+  /* ファイルを開く */
   if((fp = fopen(fname, "rb")) == NULL) {
     fprintf(stderr, "file(%s) can't open.\n", fname) ;
     exit(-1) ;
   }
 
-  /* ヘッダー部分読み込み(行数,列数設定) */  
+  /* ヘッダー部分読み込み(行数,列数設定) */
   i = 0 ;
-  while(1) 
+  while(1)
   {
     c = getc(fp) ;
 
@@ -272,7 +281,7 @@ void read_pgm(UCHAR data_buf[][RETU], char *fname,int *width,int *height)
       if(flg) {
 	str_buf[i] = '\0' ;
 	i = 0 ;
-	  
+
 	switch(inc) {
 	case '0':
 	  strcpy(magic_num, str_buf) ;
@@ -318,6 +327,6 @@ void read_pgm(UCHAR data_buf[][RETU], char *fname,int *width,int *height)
       data_buf[m][n] = val[k++];
     }
 
-  /* ファイルを閉じる */    
+  /* ファイルを閉じる */
   fclose(fp) ;
 }
