@@ -18,7 +18,7 @@ typedef unsigned char UCHAR;
 #define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */
 #define N_MOJI 10		/* 文字種の総数 */
 #define N_SAMPLE 6		/* 1文字あたりのデータ数 */
-#define TH_BORDER 143		/* 画素値がこの値以下の場合に境界線とみなす */
+#define TH_BORDER 128		/* 画素値がこの値以下の場合に境界線とみなす */
 
 void read_pgm(UCHAR [][RETU], char *,int *,int *);
 void calc_gyou_heikin(UCHAR [][RETU],UCHAR [][RETU],int ,int );
