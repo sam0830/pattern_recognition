@@ -18,8 +18,8 @@ typedef unsigned char UCHAR;
 #define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */
 #define N_MOJI 10		/* 文字種の総数 */
 #define N_SAMPLE 6		/* 1文字あたりのデータ数 */
-#define THRESH_BIN 180		/* 2値化する閾値 */
-#define THRESH_MENSEKI 20	/* ノイズ除去のため面積がこれ以下の領域を削除 */
+#define THRESH_BIN 150		/* 2値化する閾値 */
+#define THRESH_MENSEKI 52	/* ノイズ除去のため面積がこれ以下の領域を削除 */
 #define MaxLabel 500		/* ラベル数の最大値(想定される値より大きめに設定) */
 #define SIZE_RATIO 0.90		/* 文字を正規化する際の行(列)数に対するサイズ比率 */
 
@@ -211,14 +211,8 @@ void seikika(UCHAR res[][RETU_MOJI],int dim_gyou,int dim_retu, float ratio_targe
     ratio_g=(float)(max_g-min_g)/(float)(GYOU_MOJI-1);
     ratio_r=(float)(max_r-min_r)/(float)(RETU_MOJI-1);
 
-			/******** (A)最終的な倍率(ratio_change)を決定する処理を入れる ***********/
-
-
-
-
-
-
-
+    /******** (A)最終的な倍率(ratio_change)を決定する処理を入れる ***********/
+    ratio_change = (ratio_g>ratio_r)?SIZE_RATIO/ratio_g:SIZE_RATIO/ratio_r; /*ratio_gとratio_rの大きいを基準にする*/\
 				/* 正規化画像算出(逆変換座標算出，最近隣内挿法利用) */
 				/* res[inv_g][inv_r]をもとにして正規化画像tmp[g][r]を作成する */
                                 /* 逆変換座標算出，最近隣内挿法． */
@@ -226,19 +220,25 @@ void seikika(UCHAR res[][RETU_MOJI],int dim_gyou,int dim_retu, float ratio_targe
 				/******** (B)このループ内を完成させる *********/
     for(g=0;g<dim_gyou;g++)	{/* この行以外を変更して良い． */
         for(r=0;r<dim_retu;r++)	{
-
-
-
-
-
-
+            inv_g = (g-new_cent_g)/ratio_change + cent_g + 0.50f;
+            inv_r = (r-new_cent_r)/ratio_change + cent_r + 0.50f;
+            /*領域外処理*/
+            if(inv_g < min_g || inv_g > max_g) {
+                tmp[g][r] = WHITE;
+                continue;
+            }
+            if(inv_r < min_r || inv_r > max_r) {
+                tmp[g][r] = WHITE;
+                continue;
+            }
+            tmp[g][r] = res[inv_g][inv_r];
         }
     }
 
-  for(g=0;g<dim_gyou;g++)	/* 元画像に代入 */
+    for(g=0;g<dim_gyou;g++)	/* 元画像に代入 */
         for(r=0;r<dim_retu;r++)
             res[g][r]=tmp[g][r];
-  }
+}
 
 
 
