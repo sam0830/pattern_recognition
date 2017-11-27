@@ -20,18 +20,20 @@ typedef unsigned char UCHAR;
 #define N_ID 121		/* 学習(orテスト)に使用するIDの最大数 */
 #define LEN_ID 8		/* IDの文字数+1(IDは6文字か7文字) */
 #define GYOU_MOJI 100		/* 切り出す画像の行数 */
-#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */  
+#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */
 #define N_MOJI 10		/* 文字種の総数 */
 #define AVE_VALUE 20		/* 反転画像の平均画素値をこの値にそろえる(固定) */
 #define BLACK 0			/* 黒の画素値 */
 #define WHITE 255		/* 白の画素値 */
 
-#define PATH_FOR_DATA "/mnt/oshare/2017/大宮月曜２限パターン認識 - 2311101030/配布用" /* データのパス */
+#define PATH_FOR_DATA "/home/takahiro/work/pattern_recognition" /* データのパス */
 
-#define KYOUSHI_ID_FILENAME "./alllist.txt"  /* 教師データとして利用するIDのリスト */
-#define TEST_ID_FILENAME    "./alllist.txt" /* テストデータとして利用するIDのリスト */
-//#define KYOUSHI_ID_FILENAME "./halflist1.txt"  /* 教師データとして利用するIDのリスト */
-//#define TEST_ID_FILENAME    "./halflist2.txt" /* テストデータとして利用するIDのリスト */
+//#define KYOUSHI_ID_FILENAME "./alllist.txt"  /* 教師データとして利用するIDのリスト */
+//#define TEST_ID_FILENAME    "./alllist.txt" /* テストデータとして利用するIDのリスト */
+#define KYOUSHI_ID_FILENAME "./halflist1.txt"  /* 教師データとして利用するIDのリスト */
+#define TEST_ID_FILENAME    "./halflist2.txt" /* テストデータとして利用するIDのリスト */
+// #define KYOUSHI_ID_FILENAME "singlelist.txt"
+// #define TEST_ID_FILENAME "singlelist.txt"
 
 				/* 各ID,各文字について教師データに用いるデータ番号を指定 */
 int sample_tch[]={0,1,2,3,4,5};
@@ -86,8 +88,8 @@ int main(int argc,char *argv[])
   float norm_kyoushi[N_MOJI];	/* 各文字の教師データのノルム(ベクトル長) */
   float norm_test;		/* テストデータのノルム */
 #endif
-  
-  
+
+
   /***** IDの読み込み *****/
   num_id_tch=read_id_list(id_tch, KYOUSHI_ID_FILENAME);/* 教師データ用ID読み込み */
   printf("Number of ID for tch = %d\n",num_id_tch);
@@ -105,7 +107,7 @@ int main(int argc,char *argv[])
       for(n=0;n<num_id_tch;n++)
 	for(j=0;j<n_sample_tch;j++)
 	{			/* 教師データのファイル名 */
-	  sprintf(in_fname,"%s/Mae/%s/SIGMA0/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_tch[n],id_tch[n],i,sample_tch[j]); 
+	  sprintf(in_fname,"%s/Mae/%s/SIGMA0/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_tch[n],id_tch[n],i,sample_tch[j]);
 	  read_pgm((UCHAR **)kyoushi[i], in_fname, &in_retu, &in_gyou);	/* ベクトルとして読み込む */
 	  if((in_retu != RETU_MOJI) || (in_gyou != GYOU_MOJI))
 	    error1("Dimensions are wrong.");
@@ -137,9 +139,9 @@ int main(int argc,char *argv[])
 #endif
 #ifdef SOUKAN
     for(i=0;i<N_MOJI;i++)	/* 相互相関で用いる教師データのノルム算出 */
-      norm_kyoushi[i]=		/* (A)この行を完成させる */
+      norm_kyoushi[i]= calc_norm((UCHAR *)kyoushi[i], in_gyou*in_retu);		/* (A)この行を完成させる */
 #endif
-    
+
     rate_max=-1.0;		/* rate_max,rate_minの初期化 */
     rate_min=101.0;
     n_correct_total=0;		/* 全IDの全データでの正解数を初期化 */
@@ -148,14 +150,14 @@ int main(int argc,char *argv[])
     {
       n_correct_id=0;		/* そのIDの全データでの正解数を初期化 */
       n_id=0;
-      for(i=0;i<N_MOJI;i++)	  
+      for(i=0;i<N_MOJI;i++)
       {
 	printf("%2d  ",i);
 	n_correct_moji=0;	/* 各文字の正解数を初期化 */
 	n_moji=0;
 	for(j=0;j<n_sample_test;j++)
 	{			/* テスト画像ファイル名 */
-	  sprintf(in_fname,"%s/Mae/%s/SIGMA0/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_test[n],id_test[n],i,sample_test[j]); 
+	  sprintf(in_fname,"%s/Mae/%s/SIGMA0/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_test[n],id_test[n],i,sample_test[j]);
 	  read_pgm((UCHAR **)test, in_fname, &in_retu, &in_gyou);  /* テスト画像読み込み */
 	  if((in_retu != RETU_MOJI) || (in_gyou != GYOU_MOJI))
 	    error1("Dimensions are wrong.");
@@ -165,7 +167,7 @@ int main(int argc,char *argv[])
 	  average_adjustment((UCHAR *)test, AVE_VALUE, in_retu*in_gyou); /* 平均値をAVE_VALUEに規格化 */
 
 #ifdef SOUKAN
-	  norm_test=		/* (B)この行を完成させる */
+	  norm_test= calc_norm((UCHAR *)test, in_gyou*in_retu);		/* (B)この行を完成させる */
 #endif
 	  eval_ans=-GYOU_MOJI*RETU_MOJI*WHITE*WHITE-1.0; /* 評価値を考えられる最小値に設定 */
 	  for(m=0;m<N_MOJI;m++)
@@ -174,7 +176,7 @@ int main(int argc,char *argv[])
 	    eval=naiseki((UCHAR *)test, (UCHAR *)kyoushi[m], in_gyou*in_retu)-bias[m];
 #endif
 #ifdef SOUKAN
-	    eval=		/* (C)この行を完成させる */
+	    eval=naiseki((UCHAR *)test, (UCHAR *)kyoushi[m], in_gyou*in_retu)/sqrt(norm_test*norm_kyoushi[m]);		/* (C)この行を完成させる */
 #endif
 	    if(eval > eval_ans)	/* 評価値が最大となる数字mを保存 */
 	    {
@@ -193,7 +195,7 @@ int main(int argc,char *argv[])
 	  }
 	  n_moji++;
 	}                      /* 各IDの各文字の正解率表示 */
-	printf("%ld/%ld (%5.1f%%)\n",n_correct_moji,n_moji,(float)n_correct_moji/(float)n_moji*100.0); 
+	printf("%ld/%ld (%5.1f%%)\n",n_correct_moji,n_moji,(float)n_correct_moji/(float)n_moji*100.0);
 	n_correct_id += n_correct_moji;
 	n_id += n_moji;
       }
@@ -225,9 +227,10 @@ float calc_norm(UCHAR img[],int dim)
   int i;
   float norm=0.0;
 
-  for(i=0;i<dim;i++)
-				/* (D) この行を完成させる */
-
+  for(i=0;i<dim;i++) {
+      /* (D) この行を完成させる */
+      norm += img[i]*img[i];
+  }
   return norm;
 }
 
@@ -237,8 +240,10 @@ float naiseki(UCHAR test[],UCHAR kyoushi[],int dim)
   int i;
   float inp=0.0;
 
-  for(i=0;i<dim;i++)
-				/* (E) この行を完成させる */
+  for(i=0;i<dim;i++) {
+      /* (E) この行を完成させる */
+      inp += test[i]*kyoushi[i];
+  }
 
   return inp;
 }
@@ -260,11 +265,11 @@ void average_adjustment(UCHAR x[],double av,int n)
   double sum=0.0;
   double ratio;
   int val;
-  
+
   for(i=0;i<n;i++)
     sum += x[i];
   ratio=av/(sum/(double)n);
-  
+
   for(i=0;i<n;i++)
   {
     val=(int)((double)x[i]*ratio+0.5);
@@ -314,7 +319,7 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
   FILE	*fp ;
   char	str_buf[128] ;
   char	magic_num[8] ; /* マジックナンバー */
-  int	max_val ;      /* 画素値の最大値 */    
+  int	max_val ;      /* 画素値の最大値 */
   int	c, i, m, n ;
   int	inc = '0' ;
   int	flg = 0 ;
@@ -323,15 +328,15 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
   long  k;
   UCHAR *val;
 
-  /* ファイルを開く */    
+  /* ファイルを開く */
   if((fp = fopen(fname, "rb")) == NULL) {
     fprintf(stderr, "file(%s) can't open.\n", fname) ;
     exit(-1) ;
   }
 
-  /* ヘッダー部分読み込み(行数,列数設定) */  
+  /* ヘッダー部分読み込み(行数,列数設定) */
   i = 0 ;
-  while(1) 
+  while(1)
   {
     c = getc(fp) ;
 
@@ -357,7 +362,7 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
       if(flg) {
 	str_buf[i] = '\0' ;
 	i = 0 ;
-	  
+
 	switch(inc) {
 	case '0':
 	  strcpy(magic_num, str_buf) ;
@@ -401,7 +406,7 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
 
   free(val);
 
-  /* ファイルを閉じる */    
+  /* ファイルを閉じる */
   fclose(fp) ;
 }
 
@@ -446,4 +451,3 @@ void error1(char *message)
   printf("%s\n",message);
   exit(1);
 }
-
