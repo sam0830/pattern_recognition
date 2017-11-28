@@ -13,15 +13,15 @@
 
 typedef unsigned char UCHAR;
 
-#define MY_ID "bp13033"		/* 自分の学籍番号 */
-#define AITE_ID "bp13035"	/* 相手の学籍番号 */
+#define MY_ID "bp15108"		/* 自分の学籍番号 */
+#define AITE_ID "bp13114"	/* 相手の学籍番号 */
 #define GYOU_MOJI 100		/* 切り出す画像の行数 */
-#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */  
+#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */
 #define GYOU_PRT (GYOU_MOJI*4)	/* プリント画像の行数 */
-#define RETU_PRT (RETU_MOJI*5)	/* プリント画像の列数 */  
+#define RETU_PRT (RETU_MOJI*5)	/* プリント画像の列数 */
 #define N_MOJI 10		/* 文字種の総数 */
 #define N_SAMPLE 6		/* 1文字あたりのデータ数 */
-#define PATH_FOR_DATA "/mnt/oshare/2017/大宮月曜２限パターン認識 - 2311101030/配布用" /* データのパス */
+#define PATH_FOR_DATA "/home/takahiro/work/pattern_recognition" /* データのパス */
 
 void read_cut_pgm(UCHAR [][RETU_MOJI], char *,int *,int *);
 void write_pgm(UCHAR **,char *,int ,int );
@@ -65,7 +65,7 @@ int main(int argc,char *argv[])
       for(r=1;r<RETU_MOJI-1;r++)
 	res[g+g_start][r+r_start]=(UCHAR)((float)sum[g][r]/(float)(N_SAMPLE)+0.49999);
   }
-  
+
 
   for(i=0;i<N_MOJI;i++)		/* 正規化画像について処理 */
   {
@@ -91,7 +91,7 @@ int main(int argc,char *argv[])
       for(r=1;r<RETU_MOJI-1;r++)
 	res[g+g_start][r+r_start]=(UCHAR)((float)sum[g][r]/(float)(N_SAMPLE)+0.49999);
   }
-  
+
 
   sprintf(out_fname,"./%s-%s-hikaku.pgm",MY_ID,AITE_ID); /* 出力画像ファイル名 */
   write_pgm((UCHAR **)res, out_fname, RETU_PRT, GYOU_PRT);  /* 出力画像書き込み */
@@ -141,7 +141,7 @@ void read_cut_pgm(UCHAR data_buf[][RETU_MOJI], char *fname,int *width,int *heigh
   FILE	*fp ;
   char	str_buf[128] ;
   char	magic_num[8] ; /* マジックナンバー */
-  int	max_val ;      /* 画素値の最大値 */    
+  int	max_val ;      /* 画素値の最大値 */
   int	c, i, m, n ;
   int	inc = '0' ;
   int	flg = 0 ;
@@ -150,15 +150,15 @@ void read_cut_pgm(UCHAR data_buf[][RETU_MOJI], char *fname,int *width,int *heigh
   long  k;
   UCHAR val[GYOU_MOJI*RETU_MOJI]; /* データ読み込み用バッファ(画像と同じサイズ) */
 
-  /* ファイルを開く */    
+  /* ファイルを開く */
   if((fp = fopen(fname, "rb")) == NULL) {
     fprintf(stderr, "file(%s) can't open.\n", fname) ;
     exit(-1) ;
   }
 
-  /* ヘッダー部分読み込み(行数,列数設定) */  
+  /* ヘッダー部分読み込み(行数,列数設定) */
   i = 0 ;
-  while(1) 
+  while(1)
   {
     c = getc(fp) ;
 
@@ -184,7 +184,7 @@ void read_cut_pgm(UCHAR data_buf[][RETU_MOJI], char *fname,int *width,int *heigh
       if(flg) {
 	str_buf[i] = '\0' ;
 	i = 0 ;
-	  
+
 	switch(inc) {
 	case '0':
 	  strcpy(magic_num, str_buf) ;
@@ -230,7 +230,7 @@ void read_cut_pgm(UCHAR data_buf[][RETU_MOJI], char *fname,int *width,int *heigh
       data_buf[m][n] = val[k++];
     }
 
-  /* ファイルを閉じる */    
+  /* ファイルを閉じる */
   fclose(fp) ;
 }
 
