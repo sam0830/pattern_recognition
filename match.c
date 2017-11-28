@@ -30,9 +30,10 @@ typedef unsigned char UCHAR;
 
 //#define KYOUSHI_ID_FILENAME "./alllist.txt"  /* 教師データとして利用するIDのリスト */
 //#define TEST_ID_FILENAME    "./alllist.txt" /* テストデータとして利用するIDのリスト */
-#define KYOUSHI_ID_FILENAME "./halflist1.txt"  /* 教師データとして利用するIDのリスト */
-#define TEST_ID_FILENAME    "./halflist2.txt" /* テストデータとして利用するIDのリスト */
-// #define KYOUSHI_ID_FILENAME "singlelist.txt"
+#define TEST_ID_FILENAME "alllist2.txt"
+// #define KYOUSHI_ID_FILENAME "./halflist1.txt"  /* 教師データとして利用するIDのリスト */
+// #define TEST_ID_FILENAME    "./halflist2.txt" /* テストデータとして利用するIDのリスト */
+#define KYOUSHI_ID_FILENAME "singlelist.txt"
 // #define TEST_ID_FILENAME "singlelist.txt"
 
 				/* 各ID,各文字について教師データに用いるデータ番号を指定 */
