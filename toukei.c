@@ -21,7 +21,7 @@ typedef unsigned char UCHAR;
 #define N_ID 121		/* 学習(orテスト)に使用するIDの最大数 */
 #define LEN_ID 10		/* IDの最大文字数+1 */
 #define GYOU_MOJI 100		/* 切り出す画像の行数 */
-#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */  
+#define RETU_MOJI GYOU_MOJI	/* 切り出す画像の列数 */
 #define N_MOJI 10		/* 文字種の総数 */
 #define TCH_SAMPLE 6		/* 各ID，各文字のデータ数の最大値 */
 #define AVE_VALUE 20		/* 反転画像の平均画素値をこの値にそろえる(固定) */
@@ -35,7 +35,7 @@ typedef unsigned char UCHAR;
 #define MAXDIM_MAX 1		/* max_dimの最終値(最大値) */
 #define MAXDIM_STEP 1		/* max_dimのステップ(変化量) */
 
-#define PATH_FOR_DATA "/mnt/oshare/2017/大宮月曜２限パターン認識 - 2311101030/配布用/Mae" /* データのパス */
+#define PATH_FOR_DATA "./Mae" /* データのパス */
 
 #define KL_ID_FILENAME "./alllist.txt"  /* KL変換のために利用するIDのリスト */
 #define KYOUSHI_ID_FILENAME "./alllist.txt"  /* 教師データとして利用するIDのリスト */
@@ -161,7 +161,7 @@ int main(int argc,char *argv[])
 #ifdef BAYES
     double log_pw[N_MOJI];	/* 各カテゴリの出現確率の自然対数 */
 #endif
-    
+
     printf("sigma=%d\n",sigma);
 
     /* KL変換開始 */
@@ -169,11 +169,11 @@ int main(int argc,char *argv[])
     n_kl_all=0;
     for(i=0;i<N_MOJI;i++)
     {
-      n_kl_moji=0;			
+      n_kl_moji=0;
       for(n=0;n<num_id_kl;n++) /* 全パターンの加工，縮小パターンをメモリに保存 */
 	for(j=0;j<TCH_SAMPLE;j++) /* KL変換にはそのIDの全パターンを用いる */
 	{
-	  sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_kl[n],sigma,id_kl[n],i,j); 
+	  sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_kl[n],sigma,id_kl[n],i,j);
 	  read_pgm((UCHAR **)kyoushi, in_fname, &in_retu, &in_gyou);
 	  if((in_retu != RETU_MOJI) || (in_gyou != GYOU_MOJI))
 	    error1("Dimensions are wrong.");
@@ -205,11 +205,11 @@ int main(int argc,char *argv[])
     n_tch_all=0;
     for(i=0;i<N_MOJI;i++)
     {
-      n_tch_moji=0;			
-      for(n=0;n<num_id_tch;n++) 
+      n_tch_moji=0;
+      for(n=0;n<num_id_tch;n++)
 	for(j=0;j<n_sample_tch;j++)
 	{			/* 教師データのファイル名 */
-	  sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_tch[n],sigma,id_tch[n],i,sample_tch[j]); 
+	  sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_tch[n],sigma,id_tch[n],i,sample_tch[j]);
 	  read_pgm((UCHAR **)kyoushi, in_fname, &in_retu, &in_gyou);
 	  if((in_retu != RETU_MOJI) || (in_gyou != GYOU_MOJI))
 	    error1("Dimensions are wrong.");
@@ -253,7 +253,7 @@ int main(int argc,char *argv[])
 	  printf("Number = %d\n",i);
 	  error1("Can't calculate Inverse matrix!\n");
 	}
-	
+
 	log_det[i]=log(det[i]);	/* 行列式の値については自然対数も予め算出(計算時間短縮のため) */
       }
       /* カテゴリ i の平均値av[i][]，共分散行列の逆行列inv_cvmat[i][]，行列式の値det[i]の算出終了 */
@@ -276,7 +276,7 @@ int main(int argc,char *argv[])
 	  log_pw[i]=
       }
 #endif
-    
+
       rate_max=-1.0;		/* rate_max,rate_minの初期化 */
       rate_min=101.0;
       n_correct_total=0;	/* そのIDの全データでの正解数を初期化 */
@@ -285,7 +285,7 @@ int main(int argc,char *argv[])
       {
 	n_correct_id=0;		/* そのIDの全データでの正解数を初期化 */
 	n_id=0;
-	for(i=0;i<N_MOJI;i++)	  
+	for(i=0;i<N_MOJI;i++)
 	{
 #ifndef STOP_DETAIL
 	  printf("%2d  ",i);
@@ -297,7 +297,7 @@ int main(int argc,char *argv[])
 	  //	  for(j=0;j<n_sample_test;j+=(1+(i/2==(i+1)/2)*5)) /* (b)偶数の出現確率を奇数の1/6にする */
 	  //	  for(j=0;j<n_sample_test;j+=(1+(i/2!=(i+1)/2)*5)) /* (c)奇数の出現確率を偶数の1/6にする */
 	  {			/* テスト画像ファイル名 */
-	    sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_test[n],sigma,id_test[n],i,sample_test[j]); 
+	    sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_test[n],sigma,id_test[n],i,sample_test[j]);
 	    read_pgm((UCHAR **)test, in_fname, &in_retu, &in_gyou);  /* テスト画像読み込み */
 	    if((in_retu != RETU_MOJI) || (in_gyou != GYOU_MOJI))
 	      error1("Dimensions are wrong.");
@@ -310,7 +310,7 @@ int main(int argc,char *argv[])
 
 	    for(l=0;l<n_shuku;l++) /* 後の関数用にUCHAR型から実数型へコピー */
 	      test_dbl[l]=(double)test_shuku[l];
-				/* 部分空間成分を求める */	
+				/* 部分空間成分を求める */
 	    calc_kl_component(test_cmp, max_dim, test_dbl, (double **)vec, n_shuku);
 
 #ifdef SOUKAN
@@ -318,7 +318,7 @@ int main(int argc,char *argv[])
 #endif
 	    eval_ans=-GYOU_MOJI*RETU_MOJI*WHITE*WHITE-1.0; /* 評価値を考えられる最小値に設定 */
 	    for(k=0;k<N_MOJI;k++) /* 評価値算出 */
-	    {	
+	    {
 #ifdef SENKEI
 	      eval=naiseki_double(test_cmp, kyoushi_av[k], max_dim)-bias[k];
 #endif
@@ -354,7 +354,7 @@ int main(int argc,char *argv[])
 	    n_moji++;
 	  }
 #ifndef STOP_DETAIL		/* 各IDの各文字の正解率表示 */
-	  printf("%ld/%ld (%6.2f%%)\n",n_correct_moji,n_moji,(double)n_correct_moji/(double)n_moji*100.0); 
+	  printf("%ld/%ld (%6.2f%%)\n",n_correct_moji,n_moji,(double)n_correct_moji/(double)n_moji*100.0);
 #endif
 	  n_correct_id += n_correct_moji;
 	  n_id += n_moji;
@@ -393,7 +393,7 @@ double calc_mahalanobis2(double x[],double av[],double *inv,int n)
   double sum=0.0;
   double tmp;
   int i,j;
-  
+
 /* 変数の説明 */
 /* x[] : データベクトル */
 /* av[] : 平均ベクトル */
@@ -404,10 +404,10 @@ double calc_mahalanobis2(double x[],double av[],double *inv,int n)
   {
     tmp=0.0;			/* VAL_DOUBLE()を利用する */
     for(j=0;j<n;j++)		/* (D)マハラノビス距離の2乗を算出する処理を完成する */
-      tmp += 
-    sum += 
+      tmp +=
+    sum +=
   }
-  
+
   return sum;
 }
 
@@ -417,13 +417,13 @@ void calc_av_and_cvmat(double *av, double *cvmat, UCHAR ***kyoushi_shuku, int n_
   int i,l,k,k1,k2;
   int n_all=n_moji*n_kl_moji;
 
-  /* 平均値算出 */  
+  /* 平均値算出 */
   for(k=0;k<n_shuku;k++)
     av[k]=0.0;
 
   for(i=0;i<N_MOJI;i++)
     for(l=0;l<n_kl_moji;l++)
-      for(k=0;k<n_shuku;k++) 
+      for(k=0;k<n_shuku;k++)
 	av[k] += VAL_UCHAR3D(kyoushi_shuku,i,l,k,N_ID*TCH_SAMPLE,n_shuku);
 
   for(k=0;k<n_shuku;k++)
@@ -453,12 +453,12 @@ void calc_av_and_cvmat_double(double *av, double *cvmat, double **kyoushi_dbl, i
 {
   int i,k,k1,k2;
 
-  /* 平均値算出 */  
+  /* 平均値算出 */
   for(k=0;k<max_dim;k++)
     av[k]=0.0;
 
   for(i=0;i<n_tch_moji;i++)
-    for(k=0;k<max_dim;k++) 
+    for(k=0;k<max_dim;k++)
       av[k] += VAL_DOUBLE(kyoushi_dbl,i,k,n_shuku);
 
   for(k=0;k<max_dim;k++)
@@ -472,7 +472,7 @@ void calc_av_and_cvmat_double(double *av, double *cvmat, double **kyoushi_dbl, i
 
   for(i=0;i<n_tch_moji;i++)	/* 全データ(n_tch_moji)について */
     for(k1=0;k1<max_dim;k1++)	/* 2つの次元の組み合わせについて，平均からの差分の積を加算 */
-      for(k2=k1;k2<max_dim;k2++) 
+      for(k2=k1;k2<max_dim;k2++)
 	VAL_DOUBLE(cvmat,k1,k2,max_dim) += (VAL_DOUBLE(kyoushi_dbl,i,k1,n_shuku)-av[k1])*(VAL_DOUBLE(kyoushi_dbl,i,k2,n_shuku)-av[k2]);
 
   /* 加算した配列(VAL_DOUBLE(cvmat,k1,k2,max_dim))を加算回数で割ってcvmatを完成させる */
@@ -503,7 +503,7 @@ void calc_kl_component(double *kl,int dim,double *a, double **vec,int n)
 
   for(d=0;d<dim;d++)
     tmp[d]=naiseki_double(a,(double *)((double *)vec+d*n),n);
-  
+
   for(d=0;d<dim;d++)
     kl[d]=tmp[d];
 }
@@ -513,10 +513,10 @@ double naiseki_double(double *a, double *b,int n)
 {
   double sum=0.0;
   int i;
-  
+
   for(i=0;i<n;i++)
     sum += a[i]*b[i];
-  
+
   return sum;
 }
 
@@ -525,10 +525,10 @@ void calc_inverse_kl(double *a, double *kl, double **vec,int n,int dim)
 {
   int d;
   int i;
-  
+
   for(d=0;d<n;d++)
     a[d]=0.0;
-  
+
   for(i=0;i<dim;i++)
     for(d=0;d<n;d++)
       a[d] += kl[i]*VAL_DOUBLE(vec,i,d,n);
@@ -582,7 +582,7 @@ void kakudai(UCHAR g_data[][RETU_MOJI],int dim_gyou,int dim_retu, UCHAR **shuku_
 {
   int g,r;
   int g2,r2;
-  
+
   for(g=0;g<dim_gyou;g++)
   {
     g2=g/n_size;
@@ -634,11 +634,11 @@ void average_adjustment(UCHAR x[],double av,int n)
   double sum=0.0;
   double ratio;
   int val;
-  
+
   for(i=0;i<n;i++)
     sum += x[i];
   ratio=av/(sum/(double)n);
-  
+
   for(i=0;i<n;i++)
   {
     val=(int)((double)x[i]*ratio+0.5);
@@ -688,7 +688,7 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
   FILE	*fp ;
   char	str_buf[128] ;
   char	magic_num[8] ; /* マジックナンバー */
-  int	max_val ;      /* 画素値の最大値 */    
+  int	max_val ;      /* 画素値の最大値 */
   int	c, i, m, n ;
   int	inc = '0' ;
   int	flg = 0 ;
@@ -697,15 +697,15 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
   long  k;
   UCHAR *val;
 
-  /* ファイルを開く */    
+  /* ファイルを開く */
   if((fp = fopen(fname, "rb")) == NULL) {
     fprintf(stderr, "file(%s) can't open.\n", fname) ;
     exit(-1) ;
   }
 
-  /* ヘッダー部分読み込み(行数,列数設定) */  
+  /* ヘッダー部分読み込み(行数,列数設定) */
   i = 0 ;
-  while(1) 
+  while(1)
   {
     c = getc(fp) ;
 
@@ -731,7 +731,7 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
       if(flg) {
 	str_buf[i] = '\0' ;
 	i = 0 ;
-	  
+
 	switch(inc) {
 	case '0':
 	  strcpy(magic_num, str_buf) ;
@@ -775,7 +775,7 @@ void read_pgm(UCHAR **data_buf, char *fname,int *width,int *height)
 
   free(val);
 
-  /* ファイルを閉じる */    
+  /* ファイルを閉じる */
   fclose(fp) ;
 }
 
@@ -826,7 +826,7 @@ void error1(char *message)
 void calc_eigen_vector(double **ans,double **a,double *lambda,int n)
 {
   int i,j;
-  
+
       jac(a,lambda,ans,n);
       sortev(a,lambda,ans,n);
 				/* ansの行と列を交換 */
@@ -979,12 +979,12 @@ double calc_gyakugyouretu(double **ans,double **a,int n)
   double d;
   int indx[n];
   int i,j;
-  
+
   ludcmp(a,n,indx,&d);
 
   for(j=0;j<n;j++)
     d *= VAL_DOUBLE(a,j,j,n);
-  
+
   for(j=0;j<n;j++)
   {
     for(i=0;i<n;i++)
@@ -998,7 +998,7 @@ double calc_gyakugyouretu(double **ans,double **a,int n)
   for(i=0;i<n;i++)
     for(j=0;j<n;j++)
       VAL_DOUBLE(ans,i,j,n)=y[i][j];
-  
+
   return d;
 }
 
@@ -1016,7 +1016,7 @@ void ludcmp(double **a, int n, int *indx, double *d)
   {
     big=0.0;
     for(j=0;j<n;j++)
-      if((temp=fabs(VAL_DOUBLE(a,i,j,n))) > big) 
+      if((temp=fabs(VAL_DOUBLE(a,i,j,n))) > big)
 	big=temp;
     if(big == 0.0)
       error1("Singular matrix in routine ludcmp");
@@ -1100,16 +1100,15 @@ double calc_chujitudo(double lambda[],int n_shuku,int max_dim)
   double sum=0.0;
   double wa=0.0;
   int i;
-  
+
   if(max_dim > n_shuku)
     error1("Irregal max_dim in calc_chujitudo()");
-  
+
   for(i=0;i<n_shuku;i++)	/* 固有値の総和 */
     wa += lambda[i];
-  
+
   for(i=0;i<max_dim;i++)
     sum += lambda[i];
-  
+
   return (double)(sum/wa);
 }
-
