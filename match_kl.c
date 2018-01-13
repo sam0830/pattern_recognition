@@ -34,7 +34,7 @@ typedef unsigned char UCHAR;
 #define MAXDIM_STEP 1		/* max_dimのステップ(変化量) */
 
 
-#define PATH_FOR_DATA "/home/takahiro/work/pattern_recognition/Mae" /* データのパス */
+#define PATH_FOR_DATA "/home/takahiro/work/PatternRecognition/Mae" /* データのパス */
 
 #define KL_ID_FILENAME "./alllist.txt"  /* KL変換のために利用するIDのリスト */
 #define KYOUSHI_ID_FILENAME "./halflist2.txt"  /* 教師データとして利用するIDのリスト */

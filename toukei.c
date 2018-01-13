@@ -31,15 +31,15 @@ typedef unsigned char UCHAR;
 #define SIGMA_MIN 6		/* 標準偏差の初期値(最小値) */
 #define SIGMA_MAX 6		/* 標準偏差の最終値(最大値) */
 #define SIGMA_STEP 1		/* 標準偏差のステップ(変化量) */
-#define MAXDIM_MIN 1		/* max_dim(KL変換後の利用次元数)の初期値(最小値) */
-#define MAXDIM_MAX 1		/* max_dimの最終値(最大値) */
+#define MAXDIM_MIN 24		/* max_dim(KL変換後の利用次元数)の初期値(最小値) */
+#define MAXDIM_MAX 24		/* max_dimの最終値(最大値) */
 #define MAXDIM_STEP 1		/* max_dimのステップ(変化量) */
 
-#define PATH_FOR_DATA "./Mae" /* データのパス */
+#define PATH_FOR_DATA "/home/takahiro/work/PatternRecognition/Mae" /* データのパス */
 
 #define KL_ID_FILENAME "./alllist.txt"  /* KL変換のために利用するIDのリスト */
-#define KYOUSHI_ID_FILENAME "./alllist.txt"  /* 教師データとして利用するIDのリスト */
-#define TEST_ID_FILENAME    "./alllist.txt" /* テストデータとして利用するIDのリスト */
+#define KYOUSHI_ID_FILENAME "./halflist1.txt"  /* 教師データとして利用するIDのリスト */
+#define TEST_ID_FILENAME    "./halflist2.txt" /* テストデータとして利用するIDのリスト */
 
 #define VAL_DOUBLE(p,i1,i2,size) (*((double *)p+i1*size+i2))
 #define VAL_UCHAR(p,i1,i2,size) (*((unsigned char *)p+i1*size+i2))
@@ -229,7 +229,8 @@ int main(int argc,char *argv[])
     /* これ以降，利用する次元数を変えながら処理を繰り返す */
     for(max_dim=MAXDIM_MIN;max_dim<=MAXDIM_MAX;max_dim+=MAXDIM_STEP)
     {
-      printf("max_dim=%d chujitudo=%f\n",max_dim,calc_chujitudo(lambda,n_shuku,max_dim));
+      // printf("max_dim=%d chujitudo=%f\n",max_dim,calc_chujitudo(lambda,n_shuku,max_dim));
+      printf("%d,%f,",max_dim,calc_chujitudo(lambda,n_shuku,max_dim));
       //      printf("%3d ,%f ",max_dim,calc_chujitudo(lambda,n_shuku,max_dim));
 
       /* 各カテゴリ(数字)について確率パラメータを算出する */
@@ -273,7 +274,11 @@ int main(int argc,char *argv[])
 				/* log_pw[i]はカテゴリiの出現確率の自然対数 */
       for(i=0;i<N_MOJI;i++)
       {
-	  log_pw[i]=
+          if(i%2!=0) {
+              log_pw[i] = log(1.0/(double)35);
+              continue;
+          }
+	  log_pw[i] = log(6.0/(double)35); // 全てのカテゴリの出現確率は同じ
       }
 #endif
 
@@ -295,7 +300,7 @@ int main(int argc,char *argv[])
 	  /* (E) */
 	  for(j=0;j<n_sample_test;j++) /* (a)出現確率は同じ */
 	  //	  for(j=0;j<n_sample_test;j+=(1+(i/2==(i+1)/2)*5)) /* (b)偶数の出現確率を奇数の1/6にする */
-	  //	  for(j=0;j<n_sample_test;j+=(1+(i/2!=(i+1)/2)*5)) /* (c)奇数の出現確率を偶数の1/6にする */
+	  	  for(j=0;j<n_sample_test;j+=(1+(i/2!=(i+1)/2)*5)) /* (c)奇数の出現確率を偶数の1/6にする */
 	  {			/* テスト画像ファイル名 */
 	    sprintf(in_fname,"%s/%s/SIGMA%d/%smae-%1d-%1d.pgm",PATH_FOR_DATA,id_test[n],sigma,id_test[n],i,sample_test[j]);
 	    read_pgm((UCHAR **)test, in_fname, &in_retu, &in_gyou);  /* テスト画像読み込み */
@@ -327,10 +332,10 @@ int main(int argc,char *argv[])
 	      eval=naiseki_double(test_cmp, kyoushi_av[k], max_dim)/norm_test/norm_kyoushi[k];
 #endif
 #ifdef SAIYUU			/* (B)最尤法の識別関数を完成する */
-	      eval=-0.5*
+          eval = -0.5*(calc_mahalanobis2(test_cmp, kyoushi_av[k], (double **)inv_cvmat, n_shuku)+log_det[k]);
 #endif
 #ifdef BAYES			/* (C)ベイズ識別法の識別関数を完成する */
-	      eval=-0.5*
+	      eval = -0.5*(calc_mahalanobis2(test_cmp, kyoushi_av[k], (double **)inv_cvmat, n_shuku)+log_det[k])+log_pw[k];
 #endif
 	      if(eval > eval_ans) /* 評価値が最大となる数字kを保存 */
 	      {
@@ -376,7 +381,8 @@ int main(int argc,char *argv[])
 	n_correct_total += n_correct_id;
 	n_total += n_id;
       }                /* 全データでの正解率表示 */
-      printf("TOTAL %ld/%ld (%6.2f%%)\n",n_correct_total,n_total,(double)n_correct_total/(double)n_total*100.0);
+      //printf("TOTAL %ld/%ld (%6.2f%%)\n",n_correct_total,n_total,(double)n_correct_total/(double)n_total*100.0);
+      printf("%6.2f\n",(double)n_correct_total/(double)n_total*100.0);
       //      printf(",%6.2f\n",(double)n_correct_total/(double)n_total*100.0);
 #ifndef STOP_DETAIL
       printf("Best ID  = %s (%6.2f%%)\n",id_test[id_rate_max],rate_max); /* 正解率最大，最小IDの表示 */
@@ -404,8 +410,8 @@ double calc_mahalanobis2(double x[],double av[],double *inv,int n)
   {
     tmp=0.0;			/* VAL_DOUBLE()を利用する */
     for(j=0;j<n;j++)		/* (D)マハラノビス距離の2乗を算出する処理を完成する */
-      tmp +=
-    sum +=
+      tmp += VAL_DOUBLE(inv, i, j, n)*(x[j]-av[j]);
+    sum += (x[i]-av[i])*tmp;
   }
 
   return sum;
