@@ -96,11 +96,11 @@ char	weightfilename[200];	/* 重み初期化用の重みを含むファイル名
 
 
 int main(int argc,char *argv[])
-{	
+{
   int i;
   char read_file[200];
   int dfile;			/* データファイル番号 */
-    
+
   get_params();			/* パラメータ読み込み */
 
   srand(SEED);			/* 乱数の種初期化 */
@@ -111,7 +111,7 @@ int main(int argc,char *argv[])
     get_id_file(datafilelistname); /* 学習用データファイル名のリスト読み込み。datafile_name[][],par.n_datafile設定。 */
   else
     get_id_file(testfilelistname); /* テスト用 */
-  
+
   printf("Total Datafile = %d\n",par.n_datafile);
   if(par.n_datafile <= 0)
     error1("No Datafile in idlist");
@@ -122,7 +122,7 @@ int main(int argc,char *argv[])
     sprintf(read_file,"%s/%s.tch",datafile_dir,datafile_name[dfile]);
     read_in_out_data(dfile,read_file);	/* 学習データ（in[],out[]）を読み込む */
   }
-	
+
   set_nodes_of_layer();		/* 各層のニューロン数nodes_of_layer[]設定 */
 
   init_pattern_order();	        /* パターンの学習順序を初期化 */
@@ -147,20 +147,20 @@ int main(int argc,char *argv[])
     {
 
       randomize_pattern_order(); /* pattern_order[]をランダマイズ */
-      
+
       for(data=0;data<num_of_teach_patterns;data++)
       {
 	pat_num=pattern_order[data];
 	for(i=0;i<nodes_of_layer[0];i++) /* 入力データ設定 */
 	  y[0][i]=in[pat_num][i];
 	calc_feedforward();	/* 各層のニューロンの出力計算 */
-		    
+
 	for(i=0;i<nodes_of_layer[par.o_layer];i++) /* 教師データ設定 */
 	  t[i]=out[pat_num][i];
 
 	calc_dw();		/* 重み更新量計算 */
 	update_w();		/* 重み更新 */
-      }		
+      }
 
       learning_per_pat++;	/* 学習回数加算 */
 
@@ -192,7 +192,7 @@ int main(int argc,char *argv[])
     int ans_number;
     float max_y;
     int n_correct=0;		/* 正解数 */
-    
+
     for(data=0;data<num_of_teach_patterns;data++)
     {
       pat_num=pattern_order[data];
@@ -208,19 +208,19 @@ int main(int argc,char *argv[])
 	  ans_number=i;
 	  max_y=y[par.o_layer][i];
 	}
-      
+
       if(out[pat_num][ans_number] > 0.5) /* 正解の場合 */
 	n_correct++;
       else
       {
 	//	printf("id=%d -> %d\n",data_id[pat_num],ans_number);
       }
-    }		
+    }
     printf("Correct rate= %6.2f(%%) (%d/%d)\n",(float)n_correct/(float)num_of_teach_patterns*100.0,n_correct,num_of_teach_patterns);
-    
+
     printf("error=%g\n",calc_error()); /* 2乗平均誤差算出 */
   }
-  
+
   return 1;
 }
 
@@ -230,7 +230,7 @@ void calc_feedforward()
   int layer,layer_d;
   int i,j;
   float u;
-    
+
   for(layer=1;layer<par.layers;layer++)	/* 下位層から */
   {
     layer_d=layer-1;		/* 一つ下の層番号 */
@@ -239,7 +239,7 @@ void calc_feedforward()
       u=0.0;
       for(j=0;j<nodes_of_layer[layer_d];j++) /* 総入力計算 */
 	/*(A)*/
-	u += 
+	u += w[par.o_layer][i][j]*y[par.o_layer][i];
 
       if(u < -90.0)		/* exp()のエラーを避けるため総入力の絶対値を90未満とする */
 	u=-90.0;
@@ -247,9 +247,9 @@ void calc_feedforward()
 	u=90.0;
 
       /*(B)*/
-      y[layer][i]=
+      y[layer][i] = 1.0/(1.0+exp(-u/2.0));
     }
-  }	
+  }
 }
 
 /* 重み更新量計算 */
@@ -258,7 +258,7 @@ void calc_dw()
   int layer,layer_u;
   int i,j;
   float sum,temp;
-    
+
   for(i=0;i<nodes_of_layer[par.o_layer];i++) /* 出力層のエラー(誤差)計算 */
     d[par.o_layer][i]=t[i]-y[par.o_layer][i];
 
@@ -271,7 +271,7 @@ void calc_dw()
       for(i=0;i<nodes_of_layer[layer_u];i++)
       {
 	/*(C)*/ /* 上位層が出力層以外の場合でも算出できるようにする必要がある */
-	temp=
+	temp =
 
 	dw[layer][i][j]=par.epsilon*temp*y[layer][j]+par.alpha*dw[layer][i][j];
 	sum += temp*w[layer][i][j];
@@ -285,7 +285,7 @@ void calc_dw()
 void update_w()
 {
   int layer,j,i;
-    
+
   for(layer=0;layer<par.o_layer;layer++)
     for(i=0;i<=nodes_of_layer[layer+1];i++)
       for(j=0;j<nodes_of_layer[layer];j++)
@@ -293,13 +293,13 @@ void update_w()
 }
 
 /* ２乗平均誤差計算 */
-float calc_error() 
+float calc_error()
 {
   int data;
   int i;
   float sum,e;
   int pat_num;
-    
+
   sum=0.0;
   for(data=0;data<num_of_teach_patterns;data++)
   {
@@ -307,15 +307,15 @@ float calc_error()
     for(i=0;i<nodes_of_layer[0];i++) /* 入力データ設定 */
       y[0][i]=in[pat_num][i];
     calc_feedforward();		/* 各層のニューロンの出力計算 */
-	
+
     for(i=0;i<nodes_of_layer[par.o_layer];i++) /* そのパターンの誤差計算 */
     {
       e=y[par.o_layer][i]-out[pat_num][i];
       sum += e*e;
-    }	    
-  }		
+    }
+  }
   sum /= (float)(num_of_teach_patterns*2.0);
-    
+
   return sum;
 }
 
@@ -324,7 +324,7 @@ float calc_error()
 #define CountLimitBairitufile 2000
 
 /* id読み込み。data_name[][],par.n_datafile設定。 */
-void get_id_file(char *str)	
+void get_id_file(char *str)
 {
   FILE *wtfile;
   int	y;			/* データ読み込みのための変数 */
@@ -334,9 +334,9 @@ void get_id_file(char *str)
   char temp_name[MaxDataNameLength];
   char read_char[MaxDataNameLength];
   int count_limit;
-    
+
   sprintf(tfilename,"%s",str);
-  if ((wtfile=fopen(tfilename,"r"))!=NULL) 
+  if ((wtfile=fopen(tfilename,"r"))!=NULL)
   {
     count_limit=0;
     sprintf(read_char," ");
@@ -355,8 +355,8 @@ void get_id_file(char *str)
     y=0;
     end_flag=NO;
     count_limit=0;
-    while ((end_flag == NO)&&(fgets(inlinetit,TxtLineLen,wtfile)!=NULL)) 
-    {              
+    while ((end_flag == NO)&&(fgets(inlinetit,TxtLineLen,wtfile)!=NULL))
+    {
       count_limit++;
       if(count_limit > CountLimitBairitufile)
 	error1("$END doesn't exist in idlist");
@@ -369,7 +369,7 @@ void get_id_file(char *str)
       {
 	if(inlinetit[0] != '#')
 	{
-	  sscanf(inlinetit,"%s",temp_name); 
+	  sscanf(inlinetit,"%s",temp_name);
 	  strcpy(datafile_name[y],temp_name); /* データ名 */
 #ifdef DEBUG
 	  printf("%s\n",datafile_name[y]);
@@ -379,7 +379,7 @@ void get_id_file(char *str)
       }
       else
 	end_flag=OK;
-    }	
+    }
     par.n_datafile=y;		/* データファイルの総数 */
 
     fclose(wtfile);
@@ -389,7 +389,7 @@ void get_id_file(char *str)
 }
 
 /* 入力データと教師データ（in[],out[]）を読み込む */
-void read_in_out_data(int kaisuu,char *rfile) 
+void read_in_out_data(int kaisuu,char *rfile)
      /*int kaisuu;*/
      /*char *rfile;*/	/* *.tch(pathをつけない) */
 {
@@ -406,41 +406,41 @@ void read_in_out_data(int kaisuu,char *rfile)
     exit(-1) ;
   }
 
-  fgets (inlinetit,TxtLineLen,fp_tmp_wt);	
+  fgets (inlinetit,TxtLineLen,fp_tmp_wt);
   sscanf(inlinetit,"%d",&n_data_onefile);
   if(n_data_onefile <= 0)
-    error1("Wrong number of patterns in tch file");	
+    error1("Wrong number of patterns in tch file");
 
-  fgets (inlinetit,TxtLineLen,fp_tmp_wt);	
+  fgets (inlinetit,TxtLineLen,fp_tmp_wt);
   sscanf(inlinetit,"%d",&nodes[0]);
   if(nodes[0] <= 0)
-    error1("Wrong number of input neurons in tch file");	
+    error1("Wrong number of input neurons in tch file");
   if(kaisuu == 0)
     nodes_from_tch[0]=nodes[0];
   else if(nodes[0] != nodes_from_tch[0])
     error1("Input dimensions are different among files.");
 
-  fgets (inlinetit,TxtLineLen,fp_tmp_wt);	
+  fgets (inlinetit,TxtLineLen,fp_tmp_wt);
   sscanf(inlinetit,"%d",&nodes[par.layers-1]);
   if(nodes[par.layers-1] <= 0)
-    error1("Wrong number of output neurons in tch file");	
+    error1("Wrong number of output neurons in tch file");
   if(kaisuu == 0)
     nodes_from_tch[par.layers-1]=nodes[par.layers-1];
   else if(nodes[par.layers-1] != nodes_from_tch[par.layers-1])
     error1("Output dimensions are different among files.");
-	
+
   for(n_data=0;n_data<n_data_onefile;n_data++) {
     if(fgets(inlinetit,TxtLineLen,fp_tmp_wt) == NULL)
       error1("Not enough data in tch file");
     sscanf(inlinetit,"%d",&data_id[num_of_teach_patterns]);
-    
+
     if(fgets(inlinetit,TxtLineLen,fp_tmp_wt) == NULL)
       error1("No input data line in tch file");
     else
     {
       dainyuu_input_data(in[num_of_teach_patterns],nodes_from_tch[0],inlinetit);
     }
-	    
+
     if(fgets(inlinetit,TxtLineLen,fp_tmp_wt) == NULL)
       error1("No output data line in tch file");
     else {
@@ -454,9 +454,9 @@ void read_in_out_data(int kaisuu,char *rfile)
     }
     num_of_teach_patterns++;
   }
-  
+
   fclose(fp_tmp_wt) ;
-}    
+}
 
 /* 数値データに変換 */
 void dainyuu_input_data(float data[], int dim, char linebuf[])
@@ -465,7 +465,7 @@ void dainyuu_input_data(float data[], int dim, char linebuf[])
   int np=0;
   char char1[256];
   float wtempcon;
-  
+
   for(n=0;n<dim;n++)
   {				/* 空白でない次の文字を探す */
     while((linebuf[np] == ' ') || (linebuf[np] == '\t'))
@@ -474,7 +474,7 @@ void dainyuu_input_data(float data[], int dim, char linebuf[])
       if(np >= MaxNodes*30)
 	error1("Too long line in tch file (Not enough dimension?)");
     }
-	      
+
     n1=0;
     while((linebuf[np] != ' ') && (linebuf[np] != '\t') && (linebuf[np] != '\n'))
     {
@@ -484,7 +484,7 @@ void dainyuu_input_data(float data[], int dim, char linebuf[])
       if(n1 >= 256)
 	error1("Too long number in tch file");
     }
-    
+
     char1[n1]='\0';
     if(sscanf(char1,"%f",&wtempcon) <= 0)
       error1("Irregal data in tch file");
@@ -494,7 +494,7 @@ void dainyuu_input_data(float data[], int dim, char linebuf[])
 }
 
 /* 各層のニューロン数nodes_of_layerを設定 */
-void set_nodes_of_layer()	
+void set_nodes_of_layer()
 {
   int i;
 
@@ -520,24 +520,24 @@ void set_nodes_of_layer()
   printf("Layers=%d\n",par.layers);
   for(i=0;i<par.layers;i++)
     printf("layer=%d nodes=%d\n",i+1,nodes_of_layer[i]);
-#endif 
+#endif
 }
 
 /* パターンの学習順序を初期化 */
 void init_pattern_order()
 {
   int i;
-    
+
   for(i=0;i<num_of_teach_patterns;i++)
     pattern_order[i]=i;
 }
 
 /* パターンの学習順序pattern_order[]をランダマイズ */
-void randomize_pattern_order()	
+void randomize_pattern_order()
 {
   int i,temp;
   int c1,c2;
-    
+
   for(i=0;i<num_of_teach_patterns/2;i++)
   {
     c1=rnum(num_of_teach_patterns);
@@ -567,7 +567,7 @@ int rnum(int range)
 void init_weight_by_ransuu()
 {
   int layer,node1,node2;
-    
+
   for(layer=0;layer<par.layers-1;layer++)
     for(node2=0;node2<nodes_of_layer[layer+1];node2++)
       for(node1=0;node1<nodes_of_layer[layer];node1++)
@@ -585,7 +585,7 @@ void init_weight_by_ransuu()
       printf("\n");
     }
   }
-#endif    
+#endif
 }
 
 /* 重みをファイルで初期化 */
@@ -597,22 +597,22 @@ void init_weight_by_file(char *wfile)
   int scpos,d,n,dum,i;		/* データ読み込みのための変数 */
   int nod,lay,chars;
   float wtempcon;
-    
-  if ((wtfile=fopen(wfile,"r"))!=NULL) 
+
+  if ((wtfile=fopen(wfile,"r"))!=NULL)
   {
     d=n=0;
-    fgets (inlinetit,TxtLineLen,wtfile);	
+    fgets (inlinetit,TxtLineLen,wtfile);
     sscanf(inlinetit,"%d",&dum);
     if (dum != par.layers)
-      error1("Wrong number of layers in weight_file");	
+      error1("Wrong number of layers in weight_file");
     for(i=0;i<par.layers;i++)
     {
-      fgets (inlinetit,TxtLineLen,wtfile);	
+      fgets (inlinetit,TxtLineLen,wtfile);
       sscanf(inlinetit,"%d",&dum);
       if (dum != nodes_of_layer[i])
-	error1("Wrong number of nodes in weight_file");	
+	error1("Wrong number of nodes in weight_file");
     }
-	
+
     for(i=par.o_layer-1;i>=0;i--)
     {
       for(n=0;n<nodes_of_layer[i+1];n++)
@@ -657,7 +657,7 @@ void init_weight_by_file(char *wfile)
 void weight_set_to_0(float ww[][MaxNodes][MaxNodes])
 {
   int layer,node1,node2;
-    
+
   for(layer=0;layer<par.o_layer;layer++)
     for(node2=0;node2<=nodes_of_layer[layer+1];node2++)
       for(node1=0;node1<nodes_of_layer[layer];node1++)
@@ -665,13 +665,13 @@ void weight_set_to_0(float ww[][MaxNodes][MaxNodes])
 }
 
 /* 重みをファイルにセーブする */
-void save_weights(char *extens)	
+void save_weights(char *extens)
      /*  char *extens; */	/* ファイル名の最後につける名前 */
 {
   FILE *wtfile;			/* 重みファイル */
   char tfilename[TxtLineLen];
   int i,chars,n,d;		/* 重み書き込み用変数 */
-    
+
   sprintf(tfilename,"bp%s.wout%s",ident,extens);
   if ((wtfile=fopen(tfilename,"w"))==NULL) error1("Can't write weight-file");
   fprintf(wtfile,"%d\n",par.layers);
@@ -703,7 +703,7 @@ void get_params()
 {
   char tfilename[TxtLineLen];
   FILE *parfile;
-  
+
   sprintf(tfilename,"bp%s.par",ident);
   if ((parfile=fopen(tfilename,"r"))==NULL)
   {
@@ -723,8 +723,8 @@ void get_params()
   getcharpar(parfile, "Weight for Init",weightfilename);
   getcharpar(parfile, "DatafileList for Learn",datafilelistname);
   getcharpar(parfile, "DatafileList for Test",testfilelistname);
-  
-  fclose(parfile);	  
+
+  fclose(parfile);
 
   if((par.layers <= 1) || (par.layers >= 4))
     error1("2 <= Layers <= 3 in par_file");
@@ -740,8 +740,8 @@ void getintpar(FILE *parfile, char *string,int *var)
   char *succ;			/* 関数fgets()の出力を代入する変数 */
   char template[40];		/* パラメータを読み込む書式 */
   int no_of_vars;		/* そのパラメータの行に書かれた数値の個数 */
-    
-  do succ=fgets(inlinetit,TxtLineLen,parfile); 
+
+  do succ=fgets(inlinetit,TxtLineLen,parfile);
   while ((inlinetit[0]=='*'||inlinetit[0]==' '||inlinetit[0]=='\n')&&succ!=NULL);
   sprintf(template,"%s: %%d %%d %%d",string);
   no_of_vars=sscanf(inlinetit,template,var,&iparinc,&iparend);
@@ -756,7 +756,7 @@ void getintpar(FILE *parfile, char *string,int *var)
 }
 
 /* 実数のパラメータ読み込み */
-void getfltpar(FILE *parfile,char *string,float *var)	
+void getfltpar(FILE *parfile,char *string,float *var)
      /*  char string[40]; */	/* パラメータファイルにおけるパラメータの前書き */
      /*  float *var; */		/* パラメータ */
 {
@@ -765,7 +765,7 @@ void getfltpar(FILE *parfile,char *string,float *var)
   char *succ;			/* 関数fgets()の出力に代入する変数 */
   char template[40];		/* パラメータを読み込む書式 */
   int no_of_vars;		/* そのパラメータの行に書かれた数値の個数 */
-    
+
   do succ=fgets(inlinetit,TxtLineLen,parfile);
   while ((inlinetit[0]=='*'||inlinetit[0]==' '||inlinetit[0]=='\n')&&succ!=NULL);
   sprintf(template,"%s: %%g %%g %%g",string);
@@ -781,7 +781,7 @@ void getfltpar(FILE *parfile,char *string,float *var)
 }
 
 /* 文字列のパラメータ読み込み */
-void getcharpar(FILE *parfile,char *string,char *var)	
+void getcharpar(FILE *parfile,char *string,char *var)
      /*  char string[100]; */	/* パラメータファイルにおけるパラメータの前書き */
      /*  char *var; */		/* パラメータ */
 {
@@ -789,8 +789,8 @@ void getcharpar(FILE *parfile,char *string,char *var)
   char *succ;			/* 関数fgets()の出力を代入する変数 */
   char template[100];		/* パラメータを読み込む書式 */
   int no_of_vars;		/* そのパラメータの行に書かれた数値の個数 */
-    
-  do succ=fgets(inlinetit,TxtLineLen,parfile); 
+
+  do succ=fgets(inlinetit,TxtLineLen,parfile);
   while ((inlinetit[0]=='*'||inlinetit[0]==' '||inlinetit[0]=='\n')&&succ!=NULL);
   sprintf(template,"%s: %%s",string);
   no_of_vars=sscanf(inlinetit,template,var);
@@ -803,4 +803,3 @@ void getcharpar(FILE *parfile,char *string,char *var)
     break;
   }
 }
-
