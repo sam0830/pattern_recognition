@@ -239,7 +239,7 @@ void calc_feedforward()
       u=0.0;
       for(j=0;j<nodes_of_layer[layer_d];j++) /* 総入力計算 */
 	/*(A)*/
-	u += w[par.o_layer][i][j]*y[par.o_layer][i];
+	u += w[layer_d][i][j]*y[layer_d][j];
 
       if(u < -90.0)		/* exp()のエラーを避けるため総入力の絶対値を90未満とする */
 	u=-90.0;
@@ -247,7 +247,7 @@ void calc_feedforward()
 	u=90.0;
 
       /*(B)*/
-      y[layer][i] = 1.0/(1.0+exp(-u/2.0));
+      y[layer][i] = 1.0/(1.0+exp(-u));
     }
   }
 }
@@ -271,7 +271,7 @@ void calc_dw()
       for(i=0;i<nodes_of_layer[layer_u];i++)
       {
 	/*(C)*/ /* 上位層が出力層以外の場合でも算出できるようにする必要がある */
-	temp =
+	temp = -d[layer_u][i]*y[layer_u][i]*(1.0-y[layer_u][i]);
 
 	dw[layer][i][j]=par.epsilon*temp*y[layer][j]+par.alpha*dw[layer][i][j];
 	sum += temp*w[layer][i][j];
