@@ -13,7 +13,7 @@
 
 #define MaxLayers 3		/* 最大層数 */
 #define MaxNodes 50		/* 各層の最大ニューロン数 */
-#define SEED 200		/* 乱数の種の初期値(基本的に学籍番号の下3桁) */
+#define SEED 108	/* 乱数の種の初期値(基本的に学籍番号の下3桁) */
 
 #define MaxDataFileNum 121	/* データファイルの最大数 */
 #define MaxDataNum MaxDataFileNum*60 /* 学習パターンの最大数 */
@@ -271,7 +271,7 @@ void calc_dw()
       for(i=0;i<nodes_of_layer[layer_u];i++)
       {
 	/*(C)*/ /* 上位層が出力層以外の場合でも算出できるようにする必要がある */
-	temp = -d[layer_u][i]*y[layer_u][i]*(1.0-y[layer_u][i]);
+	temp = d[layer_u][i]*y[layer_u][i]*(1.0-y[layer_u][i]);
 
 	dw[layer][i][j]=par.epsilon*temp*y[layer][j]+par.alpha*dw[layer][i][j];
 	sum += temp*w[layer][i][j];
